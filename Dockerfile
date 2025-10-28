@@ -1,6 +1,6 @@
 # --- 阶段 1: "构建" ---
 # 使用一个包含 Java 17 和 Maven 的标准镜像
-FROM maven:3.9-eclipse-temurin-17 AS build
+FROM maven:3.9-eclipse-temurin-21 AS build
 
 # 在容器内创建一个工作目录
 WORKDIR /app
@@ -18,7 +18,7 @@ RUN mvn package -DskipTests
 
 # --- 阶段 2: "运行" ---
 # 使用一个*非常小*的、只包含 Java 17 的镜像
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:21-jre
 
 # 在新镜像中创建工作目录
 WORKDIR /app
