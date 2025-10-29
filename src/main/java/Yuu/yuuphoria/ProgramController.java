@@ -86,4 +86,27 @@ public class ProgramController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    /**
+     * 处理删除 Program 的 DELETE 请求
+     * @param id 要删除的 Program 的 ID (从 URL 路径中提取)
+     * @return 返回 HTTP 状态码 204 (No Content) 表示成功，或 404 (Not Found) 如果 ID 不存在
+     */
+    @DeleteMapping("/{id}") // 监听 DELETE /api/programs/{具体的ID}
+    public ResponseEntity<Void> deleteProgram(@PathVariable Long id) { // 从 URL 路径获取 ID
+
+        // 1. 先检查这个 ID 是否存在于数据库中
+        if (programRepository.existsById(id)) {
+            // 执行删除操作
+            programRepository.deleteById(id);
+
+            // 2. 删除成功，按惯例返回 HTTP 状态码 204 (No Content)
+            //    ResponseEntity.noContent() 会创建一个没有响应体的 204 响应
+            return ResponseEntity.noContent().build();
+        } else {
+            // 不存在！
+            // 返回 HTTP 状态码 404 (Not Found)
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
