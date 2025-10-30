@@ -43,6 +43,27 @@ public class ProgramController {
     }
 
     /**
+     * 处理获取单个 Program 的 GET 请求
+     * @param id 要获取的 Program 的 ID (从 URL 路径中提取)
+     * @return 返回找到的 Program 对象，或者如果 ID 不存在则返回 404 Not Found
+     */
+    @GetMapping("/{id}") // 监听 GET /api/programs/{具体的ID}
+    public ResponseEntity<Program> getProgramById(@PathVariable Long id) {
+
+        // 1. 尝试从数据库根据 ID 查找 Program
+        Optional<Program> programOptional = programRepository.findById(id);
+
+        // 2. 检查是否找到了
+        if (programOptional.isPresent()) {
+            // 找到了, 返回 HTTP 状态码 200 (OK) 和 Program 对象
+            return ResponseEntity.ok(programOptional.get());
+        } else {
+            // 没找到, 返回 HTTP 状态码 404 (Not Found)
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
      * 处理更新已存在 Program 的 PUT 请求
      * @param id          要更新的 Program 的 ID (从 URL 路径中提取)
      * @param updatedData 包含更新后数据的 Program 对象 (从请求体中提取)
