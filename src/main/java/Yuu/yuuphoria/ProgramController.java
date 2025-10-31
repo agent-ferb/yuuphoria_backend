@@ -6,128 +6,57 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*; // 包含 @PostMapping, @RequestBody, @ResponseStatus
+import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/programs")
 @CrossOrigin(origins = "*")
 public class ProgramController {
 
-    private final ProgramRepository programRepository;
+    private final ProgramService programService;
 
     @Autowired
-    public ProgramController(ProgramRepository programRepository) {
-        this.programRepository = programRepository;
+    public ProgramController(ProgramService programService) {
+        this.programService = programService;
     }
 
+    // 3. GET ALL
     @GetMapping
     public List<Program> getPrograms() {
-        return programRepository.findAll();
+        // 4. 把工作转交给 Service
+        return programService.getAllPrograms();
     }
 
-    /**
-     * 处理创建新 Program 的 POST 请求
-     * @param newProgram Spring 会自动从请求体(RequestBody)的 JSON 创建这个对象
-     * @return 返回刚刚创建并保存到数据库的 Program 对象 (包含自动生成的 ID)
-     */
-    @PostMapping // 告诉 Spring: 这是处理 POST 请求的方法
-    @ResponseStatus(HttpStatus.CREATED) // 告诉前端: 如果成功，返回 HTTP 状态码 201 (Created)
-    public Program createProgram(@RequestBody Program newProgram) {
-        // 重要：确保传入的 Program 没有 ID，或者 ID 为 null，防止覆盖
-        newProgram.setId(null); // 强制 ID 为 null，让数据库生成
-        return programRepository.save(newProgram);
-    }
-
-    /**
-     * 处理获取单个 Program 的 GET 请求
-     * @param id 要获取的 Program 的 ID (从 URL 路径中提取)
-     * @return 返回找到的 Program 对象，或者如果 ID 不存在则返回 404 Not Found
-     */
-    @GetMapping("/{id}") // 监听 GET /api/programs/{具体的ID}
+    // 5. GET BY ID
+    @GetMapping("/{id}")
     public ResponseEntity<Program> getProgramById(@PathVariable Long id) {
-
-        // 1. 尝试从数据库根据 ID 查找 Program
-        Optional<Program> programOptional = programRepository.findById(id);
-
-        // 2. 检查是否找到了
-        if (programOptional.isPresent()) {
-            // 找到了, 返回 HTTP 状态码 200 (OK) 和 Program 对象
-            return ResponseEntity.ok(programOptional.get());
-        } else {
-            // 没找到, 返回 HTTP 状态码 404 (Not Found)
-            return ResponseEntity.notFound().build();
-        }
+        // (Service 会自动处理 "Not Found")
+        return ResponseEntity.ok(programService.getProgramById(id));
     }
 
-    /**
-     * 处理更新已存在 Program 的 PUT 请求
-     * @param id          要更新的 Program 的 ID (从 URL 路径中提取)
-     * @param updatedData 包含更新后数据的 Program 对象 (从请求体中提取)
-     * @return 返回更新后的 Program 对象，或者如果 ID 不存在则返回 404 Not Found
-     */
-    @PutMapping("/{id}") // 监听 PUT /api/programs/{具体的ID}
+    // 6. CREATE
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Program createProgram(@RequestBody Program newProgram) {
+        return programService.createProgram(newProgram);
+    }
+
+    // 7. UPDATE
+    @PutMapping("/{id}")
     public ResponseEntity<Program> updateProgram(
-            @PathVariable Long id,         // 从 URL 路径获取 ID
-            @RequestBody Program updatedData) { // 从请求体获取更新的数据
+            @PathVariable Long id,
+            @RequestBody Program updatedData) {
 
-        // 1. 尝试从数据库根据 ID 查找现有的 Program
-        Optional<Program> existingProgramOptional = programRepository.findById(id);
-
-        // 2. 检查是否找到了
-        if (existingProgramOptional.isPresent()) {
-            // 获取现有的 Program 对象
-            Program existingProgram = existingProgramOptional.get();
-
-            // 3. 用传入的新数据更新现有对象的字段
-            existingProgram.setTitle(updatedData.getTitle());
-            existingProgram.setDescription(updatedData.getDescription());
-            existingProgram.setDate(updatedData.getDate());
-            existingProgram.setTeamType(updatedData.getTeamType());
-            existingProgram.setInstitution(updatedData.getInstitution());
-            existingProgram.setStatus(updatedData.getStatus());
-            existingProgram.setContentTitle(updatedData.getContentTitle());
-            existingProgram.setGithubUrl(updatedData.getGithubUrl());
-            existingProgram.setPaperUrl(updatedData.getPaperUrl());
-            existingProgram.setLinksAvailable(updatedData.isLinksAvailable());
-            // 注意：不更新 ID
-
-            // 4. 保存更新后的对象回数据库
-            Program savedProgram = programRepository.save(existingProgram);
-
-            // 5. 返回 HTTP 状态码 200 (OK) 和更新后的对象
-            return ResponseEntity.ok(savedProgram);
-
-        } else {
-            // 没找到！
-            // 返回 HTTP 状态码 404 (Not Found)
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(programService.updateProgram(id, updatedData));
     }
 
-    /**
-     * 处理删除 Program 的 DELETE 请求
-     * @param id 要删除的 Program 的 ID (从 URL 路径中提取)
-     * @return 返回 HTTP 状态码 204 (No Content) 表示成功，或 404 (Not Found) 如果 ID 不存在
-     */
-    @DeleteMapping("/{id}") // 监听 DELETE /api/programs/{具体的ID}
-    public ResponseEntity<Void> deleteProgram(@PathVariable Long id) { // 从 URL 路径获取 ID
-
-        // 1. 先检查这个 ID 是否存在于数据库中
-        if (programRepository.existsById(id)) {
-            // 执行删除操作
-            programRepository.deleteById(id);
-
-            // 2. 删除成功，按惯例返回 HTTP 状态码 204 (No Content)
-            //    ResponseEntity.noContent() 会创建一个没有响应体的 204 响应
-            return ResponseEntity.noContent().build();
-        } else {
-            // 不存在！
-            // 返回 HTTP 状态码 404 (Not Found)
-            return ResponseEntity.notFound().build();
-        }
+    // 8. DELETE
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProgram(@PathVariable Long id) {
+        programService.deleteProgram(id);
+        return ResponseEntity.noContent().build();
     }
 }
