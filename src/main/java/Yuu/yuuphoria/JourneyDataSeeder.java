@@ -2,10 +2,12 @@ package Yuu.yuuphoria;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import java.util.List;
 
-@Component // 告诉 Spring 这是一个需要被管理的组件
+@Component
+@Profile("dev")
 public class JourneyDataSeeder implements CommandLineRunner {
 
     @Autowired

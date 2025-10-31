@@ -2,11 +2,13 @@ package Yuu.yuuphoria;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class DataSeeder implements CommandLineRunner {
+@Profile("dev")
+public class ProgramDataSeeder implements CommandLineRunner {
 
     @Autowired
     private ProgramRepository programRepository;
