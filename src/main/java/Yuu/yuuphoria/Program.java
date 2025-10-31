@@ -1,6 +1,8 @@
 package Yuu.yuuphoria;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "programs")
@@ -13,21 +15,24 @@ public class Program {
     private String title;
     private String description;
 
-    // --- 新增的字段，匹配你的 HTML ---
     private String date; // "Jan 2024 - May 2024"
     private String teamType; // "Team Project"
-    private String institution; // "Name of Institution"
+    private String institution;
     private String status; // "In Progress"
     private String contentTitle; // "content" 或 "idea"
     private String githubUrl;
     private String paperUrl;
     private boolean linksAvailable; // true 或 false
 
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false) // 确保它不为空，且创建后不能修改
+    private LocalDateTime createdAt;
+
     // --- 构造函数 ---
     public Program() {
     }
 
-    // 一个方便我们植入数据的构造函数
+    // 方便植入数据的构造函数
     public Program(String title, String description, String date, String teamType, String institution, String status, String contentTitle, String githubUrl, String paperUrl, boolean linksAvailable) {
         this.title = title;
         this.description = description;
@@ -42,7 +47,13 @@ public class Program {
     }
 
     // --- Getters and Setters (JPA 需要它们) ---
-    // (IntelliJ IDEA 可以为你自动生成所有这些)
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+    // (IntelliJ IDEA 自动生成所有这些)
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getTitle() { return title; }
