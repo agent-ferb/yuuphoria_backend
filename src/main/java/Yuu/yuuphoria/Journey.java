@@ -7,6 +7,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import java.util.List;
+import java.time.LocalDateTime;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 public class Journey {
@@ -26,6 +28,11 @@ public class Journey {
     // 支持多张图片
     @ElementCollection
     private List<String> images;
+
+    // 3. 添加日期字段
+    @CreationTimestamp // 自动在创建时设置时间戳
+    @Column(nullable = false, updatable = false) // 确保它不为空，且创建后不能修改
+    private LocalDateTime postDate;
 
     // --- Constructors, Getters, and Setters ---
 
