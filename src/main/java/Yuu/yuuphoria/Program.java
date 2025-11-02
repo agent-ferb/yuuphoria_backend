@@ -13,6 +13,7 @@ public class Program {
     private Long id;
 
     private String title;
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     private String date; // "Jan 2024 - May 2024"
